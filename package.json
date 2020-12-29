@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "name": "msgraph-daemon-app",
+  "description": "Showcase MS Graph Usage with a Daemon App",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "client": "yarn workspace @msgraph-daemon-app/client dev",
+    "daemon": "yarn workspace @msgraph-daemon-app/daemon start",
+    "start": "concurrently --kill-others-on-fail \"yarn daemon\" \"yarn client\""
+  },
+  "license": "MIT",
+  "dependencies": {
+    "concurrently": "^5.3.0"
+  }
+}
