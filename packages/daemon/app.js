@@ -40,6 +40,7 @@ app.locals.msalClient = new msal.ConfidentialClientApplication(msalConfig);
 
 const indexRouter = require("./routes/index");
 const authRouter = require("./routes/auth");
+const calendarRouter = require("./routes/calendar");
 const usersRouter = require("./routes/users");
 
 // Session middleware
@@ -83,6 +84,13 @@ app.use(function (req, res, next) {
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "hbs");
 
+const hbs = require("hbs");
+const moment = require("moment");
+// Helper to format date/time sent by Graph
+hbs.registerHelper("eventDateTime", function (dateTime) {
+  return moment(dateTime).format("M/D/YY h:mm A");
+});
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -91,6 +99,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/auth", authRouter);
+app.use("/calendar", calendarRouter);
 app.use("/users", usersRouter);
 
 // catch 404 and forward to error handler

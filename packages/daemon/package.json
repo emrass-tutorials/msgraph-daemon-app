@@ -15,10 +15,14 @@
     "express": "^4.17.1",
     "express-promise-router": "^4.0.1",
     "express-session": "^1.17.1",
+    "express-validator": "^6.9.0",
     "hbs": "^4.1.1",
     "http-errors": "^1.8.0",
     "isomorphic-fetch": "^3.0.0",
-    "morgan": "^1.10.0"
+    "moment": "^2.29.1",
+    "moment-timezone": "^0.5.32",
+    "morgan": "^1.10.0",
+    "windows-iana": "^4.2.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"
