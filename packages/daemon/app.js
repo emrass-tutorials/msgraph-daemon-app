@@ -8,6 +8,10 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const msal = require("@azure/msal-node");
 
+require("dotenv").config();
+
+const app = express();
+
 // In-memory storage of logged-in users
 // For demo purposes only, production apps should store
 // this in a reliable storage
@@ -35,11 +39,8 @@ const msalConfig = {
 app.locals.msalClient = new msal.ConfidentialClientApplication(msalConfig);
 
 const indexRouter = require("./routes/index");
+const authRouter = require("./routes/auth");
 const usersRouter = require("./routes/users");
-
-require("dotenv").config();
-
-const app = express();
 
 // Session middleware
 // NOTE: Uses default in-memory session store, which is not
