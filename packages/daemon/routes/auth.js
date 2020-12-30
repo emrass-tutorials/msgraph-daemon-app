@@ -1,4 +1,5 @@
-var router = require("express-promise-router")();
+const router = require("express-promise-router")();
+const graph = require("../graph");
 
 /* GET auth callback. */
 router.get("/signin", async function (req, res) {
@@ -36,12 +37,17 @@ router.get("/callback", async function (req, res) {
       tokenRequest
     );
 
-    // TEMPORARY!
-    // Flash the access token for testing purposes
-    req.flash("error_msg", {
-      message: "Access token",
-      debug: response.accessToken,
-    });
+    // Save the user's homeAccountId in their session
+    req.session.userId = response.account.homeAccountId;
+
+    const user = await graph.getUserDetails(response.accessToken);
+
+    // Add the user to user storage
+    req.app.locals.users[req.session.userId] = {
+      displayName: user.displayName,
+      email: user.mail || user.userPrincipalName,
+      timeZone: user.mailboxSettings.timeZone,
+    };
   } catch (error) {
     req.flash("error_msg", {
       message: "Error completing authentication",
