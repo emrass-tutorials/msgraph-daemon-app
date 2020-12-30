@@ -23,6 +23,8 @@ router.get("/signin", async function (req, res) {
 });
 
 router.get("/callback", async function (req, res) {
+  // TODO: check for errors
+
   const tokenRequest = {
     code: req.query.code,
     scopes: process.env.OAUTH_SCOPES.split(","),
