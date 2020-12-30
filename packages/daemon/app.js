@@ -8,8 +8,36 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const msal = require("@azure/msal-node");
 
+// In-memory storage of logged-in users
+// For demo purposes only, production apps should store
+// this in a reliable storage
+app.locals.users = {};
+
+// MSAL config
+const msalConfig = {
+  auth: {
+    clientId: process.env.OAUTH_APP_ID,
+    authority: process.env.OAUTH_AUTHORITY,
+    clientSecret: process.env.OAUTH_APP_SECRET,
+  },
+  system: {
+    loggerOptions: {
+      loggerCallback(loglevel, message, containsPii) {
+        console.log(message);
+      },
+      piiLoggingEnabled: false,
+      logLevel: msal.LogLevel.Verbose,
+    },
+  },
+};
+
+// Create msal application object
+app.locals.msalClient = new msal.ConfidentialClientApplication(msalConfig);
+
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
+
+require("dotenv").config();
 
 const app = express();
 
