@@ -11,14 +11,5 @@ yarn daemon
 yarn client
 ```
 
-## Daemon
-
-Based on https://github.com/microsoftgraph/msgraph-training-nodeexpressapp
-
-- Create the app: `npx express-generator --hbs daemon`
-
-## Client
-
-Next.js application that serves the interactive homepage. Uses OIDC to
-authenticate users using Microsoft Azure AD and communicates with the
-Daemon application to retrieve data.
+Note: currently only the daemon app exists, so only `yarn daemon` will work. In the future, I'll add a
+Single Page Application (SPA) for delegated access, whereas application requests will remain in the daemon.
