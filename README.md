@@ -13,3 +13,8 @@ yarn client
 
 Note: currently only the daemon app exists, so only `yarn daemon` will work. In the future, I'll add a
 Single Page Application (SPA) for delegated access, whereas application requests will remain in the daemon.
+
+## Setup
+
+1. Register the application in the Azure Portal
+2. Copy `.env.sample` to `.env` and update app id and client secret
