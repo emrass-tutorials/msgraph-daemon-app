@@ -29,7 +29,7 @@ router.get("/", async function (req, res, next) {
       clientId: process.env.OAUTH_APP_ID,
       clientSecret: process.env.OAUTH_APP_SECRET,
       authority: `https://login.microsoftonline.com/${tenantId}`,
-      redirectUri: "http://localhost:4000",
+      redirectUri: process.env.OAUTH_APP_REDIRECT_URI,
     },
   };
 
