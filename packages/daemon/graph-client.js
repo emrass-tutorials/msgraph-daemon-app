@@ -2,31 +2,35 @@ const graph = require("@microsoft/microsoft-graph-client");
 require("isomorphic-fetch");
 
 module.exports = {
-  getUserDetails: async function (accessToken) {
+  getUsers: async function (accessToken) {
     const client = getAuthenticatedClient(accessToken);
 
+    const users = await client.api("/users").get();
+
+    return users;
+  },
+
+  getUserDetails: async function (accessToken, userId) {
+    const client = getAuthenticatedClient(accessToken);
+    console.log("User ID: ", userId);
+
     const user = await client
-      .api("/me")
-      .select("displayName,mail,mailboxSettings,userPrincipalName")
+      .api(`/users/${userId}`)
+      .select("displayName,mail,userPrincipalName")
       .get();
+
     return user;
   },
 
-  getCalendarView: async function (accessToken, start, end, timeZone) {
+  getCalendarView: async function (accessToken, userId, start, end) {
     const client = getAuthenticatedClient(accessToken);
 
     const events = await client
-      .api("/me/calendarview")
-      // Add Prefer header to get back times in user's timezone
-      .header("Prefer", `outlook.timezone="${timeZone}"`)
+      .api(`/users/${userId}/calendarview"`)
       // Add the begin and end of the calendar window
       .query({ startDateTime: start, endDateTime: end })
-      // Get just the properties used by the app
-      .select("subject,organizer,start,end")
       // Order by start time
       .orderby("start/dateTime")
-      // Get at most 50 results
-      .top(50)
       .get();
 
     return events;
@@ -34,10 +38,8 @@ module.exports = {
 };
 
 function getAuthenticatedClient(accessToken) {
-  // Initialize Graph client
   const client = graph.Client.init({
-    // Use the provided access token to authenticate
-    // requests
+    // Use the provided access token to authenticate requests
     authProvider: (done) => {
       done(null, accessToken);
     },

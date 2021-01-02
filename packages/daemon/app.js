@@ -7,10 +7,21 @@ const logger = require("morgan");
 const session = require("express-session");
 const flash = require("connect-flash");
 const msal = require("@azure/msal-node");
+const cachePlugin = require("./cache-plugin");
+
+const flashTemplateMiddleware = require("./middlewares/flash.js");
+const authMiddleware = require("./middlewares/auth.js");
+const indexRouter = require("./routes/index");
+const accountRouter = require("./routes/account");
+const usersRouter = require("./routes/users");
+const syncRouter = require("./routes/sync");
 
 require("dotenv").config();
-
 const app = express();
+
+// view engine setup
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "hbs");
 
 // In-memory storage of logged-in users
 // For demo purposes only, production apps should store
@@ -21,9 +32,14 @@ app.locals.users = {};
 const msalConfig = {
   auth: {
     clientId: process.env.OAUTH_APP_ID,
-    authority: process.env.OAUTH_AUTHORITY,
     clientSecret: process.env.OAUTH_APP_SECRET,
+    authority: process.env.OAUTH_AUTHORITY,
+    redirectUri: process.env.OAUTH_REDIRECT_URI,
+    postLogoutRedirectUri: process.env.OAUTH_REDIRECT_URI,
   },
+  // cache: {
+  //   cachePlugin,
+  // },
   system: {
     loggerOptions: {
       loggerCallback(loglevel, message, containsPii) {
@@ -38,12 +54,7 @@ const msalConfig = {
 // Create msal application object
 app.locals.msalClient = new msal.ConfidentialClientApplication(msalConfig);
 
-const indexRouter = require("./routes/index");
-const authRouter = require("./routes/auth");
-const calendarRouter = require("./routes/calendar");
-const usersRouter = require("./routes/users");
-
-// Session middleware
+// Middlewares
 // NOTE: Uses default in-memory session store, which is not
 // suitable for production
 app.use(
@@ -54,52 +65,19 @@ app.use(
     unset: "destroy",
   })
 );
-
-// Flash middleware
 app.use(flash());
-
-// Set up local vars for template layout
-app.use(function (req, res, next) {
-  // Read any flashed errors and save
-  // in the response locals
-  res.locals.error = req.flash("error_msg");
-
-  // Check for simple error string and
-  // convert to layout's expected format
-  const errs = req.flash("error");
-  for (let i in errs) {
-    res.locals.error.push({ message: "An error occurred", debug: errs[i] });
-  }
-
-  // Check for an authenticated user and load
-  // into response locals
-  if (req.session.userId) {
-    res.locals.user = app.locals.users[req.session.userId];
-  }
-
-  next();
-});
-
-// view engine setup
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "hbs");
-
-const hbs = require("hbs");
-const moment = require("moment");
-// Helper to format date/time sent by Graph
-hbs.registerHelper("eventDateTime", function (dateTime) {
-  return moment(dateTime).format("M/D/YY h:mm A");
-});
-
+app.use(flashTemplateMiddleware);
+app.use(authMiddleware);
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+// Routers
 app.use("/", indexRouter);
-app.use("/auth", authRouter);
-app.use("/calendar", calendarRouter);
+app.use("/account", accountRouter);
+app.use("/sync", syncRouter);
 app.use("/users", usersRouter);
 
 // catch 404 and forward to error handler
